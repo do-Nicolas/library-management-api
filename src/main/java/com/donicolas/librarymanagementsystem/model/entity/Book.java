@@ -9,7 +9,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     @Column(unique = true, nullable = false)
-    private String ISBN;
+    private String isbn;
 
     @Column(nullable = false)
     private String title;
@@ -30,12 +30,12 @@ public class Book {
         Id = id;
     }
 
-    public String getISBN() {
-        return ISBN;
+    public String getIsbn() {
+        return isbn;
     }
 
-    public void setISBN(String ISBN) {
-        this.ISBN = ISBN;
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
     }
 
     public String getTitle() {
