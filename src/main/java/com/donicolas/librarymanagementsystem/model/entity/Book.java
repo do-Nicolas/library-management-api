@@ -21,7 +21,12 @@ public class Book {
     private int totalQntt;
 
     protected Book(){}
-
+    public Book(String isbn, String title, String authorName, int totalQntt) {
+        this.isbn = isbn;
+        this.title = title;
+        this.authorName = authorName;
+        this.totalQntt = totalQntt;
+    }
     public Long getId() {
         return id;
     }
