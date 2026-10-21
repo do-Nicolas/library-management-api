@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
     @Column(unique = true, nullable = false)
     private String isbn;
 
@@ -15,7 +15,7 @@ public class Book {
     private String title;
 
     @Column(nullable = false)
-    private String author_name;
+    private String authorName;
 
     @Column(nullable = false)
     private int totalQntt;
@@ -23,11 +23,7 @@ public class Book {
     protected Book(){}
 
     public Long getId() {
-        return Id;
-    }
-
-    public void setId(Long id) {
-        Id = id;
+        return id;
     }
 
     public String getIsbn() {
@@ -46,12 +42,12 @@ public class Book {
         this.title = title;
     }
 
-    public String getAuthor_name() {
-        return author_name;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setAuthor_name(String author_name) {
-        this.author_name = author_name;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public int getTotalQntt() {
