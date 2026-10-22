@@ -1,6 +1,7 @@
 package com.donicolas.librarymanagementsystem.service;
 
 import com.donicolas.librarymanagementsystem.exception.BookHasLoansException;
+import com.donicolas.librarymanagementsystem.exception.BookNotFoundException;
 import com.donicolas.librarymanagementsystem.exception.DuplicateIsbnException;
 import com.donicolas.librarymanagementsystem.model.entity.Book;
 import com.donicolas.librarymanagementsystem.repository.BookRepository;
@@ -62,5 +63,24 @@ class BookServiceTest {
         assertThrows(BookHasLoansException.class, () -> bookService.delete(1L));
 
         verify(bookRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void delete_throwsException_andDoesNotDelete_whenBookIsNotFound(){
+        when(bookRepository.existsById(1L)).thenReturn(false);
+        assertThrows(BookNotFoundException.class, () -> bookService.delete(1L));
+
+        verify(loanRepository, never()).existsByBookId(any());
+        verify(bookRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void delete_deletesBook_whenBookExistsAndHasNoLoans(){
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        when(loanRepository.existsByBookId(1L)).thenReturn(false);
+
+        bookService.delete(1L);
+
+        verify(bookRepository).deleteById(1L);
     }
 }
