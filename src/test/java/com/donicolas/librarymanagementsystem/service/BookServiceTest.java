@@ -1,8 +1,10 @@
 package com.donicolas.librarymanagementsystem.service;
 
+import com.donicolas.librarymanagementsystem.exception.BookHasLoansException;
 import com.donicolas.librarymanagementsystem.exception.DuplicateIsbnException;
 import com.donicolas.librarymanagementsystem.model.entity.Book;
 import com.donicolas.librarymanagementsystem.repository.BookRepository;
+import com.donicolas.librarymanagementsystem.repository.LoanRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +24,8 @@ class BookServiceTest {
 
     @Mock
     private BookRepository bookRepository;
+    @Mock
+    private LoanRepository loanRepository;
 
     @InjectMocks
     private BookService bookService;
@@ -48,5 +52,15 @@ class BookServiceTest {
         assertThrows(DuplicateIsbnException.class, () -> bookService.create(book));
 
         verify(bookRepository, never()).save(any());
+    }
+
+    @Test
+    void delete_throwsException_andDoesNotDelete_whenBookHasLoans(){
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        when(loanRepository.existsByBookId(1L)).thenReturn(true);
+
+        assertThrows(BookHasLoansException.class, () -> bookService.delete(1L));
+
+        verify(bookRepository, never()).deleteById(any());
     }
 }
