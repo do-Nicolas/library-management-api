@@ -3,6 +3,7 @@ package com.donicolas.librarymanagementsystem.service;
 import com.donicolas.librarymanagementsystem.exception.BookHasLoansException;
 import com.donicolas.librarymanagementsystem.exception.BookNotFoundException;
 import com.donicolas.librarymanagementsystem.exception.DuplicateIsbnException;
+import com.donicolas.librarymanagementsystem.exception.QuantityBelowActiveLoansException;
 import com.donicolas.librarymanagementsystem.model.entity.Book;
 import com.donicolas.librarymanagementsystem.repository.BookRepository;
 import com.donicolas.librarymanagementsystem.repository.LoanRepository;
@@ -42,4 +43,14 @@ public class BookService {
         long activeLoans = loanRepository.countByBookIdAndReturnDateIsNull(id);
         return book.getTotalQntt() - (int) activeLoans;
     }
+
+    @Transactional
+    public void updateTotalQuantity(Long id, int newTotal){
+        Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Cannot find the book " + id));
+        int activeLoansQtt = (int) loanRepository.countByBookIdAndReturnDateIsNull(id);
+        if (newTotal < activeLoansQtt) throw new QuantityBelowActiveLoansException("Cannot set total to " + newTotal + ": there are " + activeLoansQtt + " active loans");
+        book.setTotalQntt(newTotal);
+
+    }
+
 }

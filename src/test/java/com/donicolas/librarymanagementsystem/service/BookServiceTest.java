@@ -3,6 +3,7 @@ package com.donicolas.librarymanagementsystem.service;
 import com.donicolas.librarymanagementsystem.exception.BookHasLoansException;
 import com.donicolas.librarymanagementsystem.exception.BookNotFoundException;
 import com.donicolas.librarymanagementsystem.exception.DuplicateIsbnException;
+import com.donicolas.librarymanagementsystem.exception.QuantityBelowActiveLoansException;
 import com.donicolas.librarymanagementsystem.model.entity.Book;
 import com.donicolas.librarymanagementsystem.repository.BookRepository;
 import com.donicolas.librarymanagementsystem.repository.LoanRepository;
@@ -128,5 +129,40 @@ class BookServiceTest {
 
         assertThrows(BookNotFoundException.class, () -> bookService.getAvailableQuantity(1L));
         verify(loanRepository, never()).countByBookIdAndReturnDateIsNull(any());
+    }
+
+    @Test
+    void updateTotalQuantity_updatesTotalQuantity_whenNewTotalIsNotBelowActiveLoans(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(loanRepository.countByBookIdAndReturnDateIsNull(1L)).thenReturn(2L);
+
+        bookService.updateTotalQuantity(1L, 4);
+        assertEquals(4, book.getTotalQntt());
+    }
+    @Test
+    void updateTotalQuantity_throwsException_whenNewTotalIsBelowActiveLoans(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(loanRepository.countByBookIdAndReturnDateIsNull(1L)).thenReturn(4L);
+
+        assertThrows(QuantityBelowActiveLoansException.class, () -> bookService.updateTotalQuantity(1L, 3));
+        assertEquals(5, book.getTotalQntt());
+    }
+    @Test
+    void updateTotalQuantity_throwsException_whenBookDoesNotExist(){
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(BookNotFoundException.class, () -> bookService.updateTotalQuantity(1L, 5));
+        verify(loanRepository, never()).countByBookIdAndReturnDateIsNull(any());
+    }
+    @Test
+    void updateTotalQuantity_updatesTotalQuantityToActiveLoans_whenNewTotalIsEqualsActiveLoans(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(loanRepository.countByBookIdAndReturnDateIsNull(1L)).thenReturn(4L);
+
+        bookService.updateTotalQuantity(1L, 4);
+        assertEquals(4, book.getTotalQntt());
     }
 }
