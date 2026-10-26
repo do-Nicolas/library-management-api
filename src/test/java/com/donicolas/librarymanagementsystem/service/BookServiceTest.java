@@ -13,8 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -82,5 +83,22 @@ class BookServiceTest {
         bookService.delete(1L);
 
         verify(bookRepository).deleteById(1L);
+    }
+
+    @Test
+    void getByIsbn_returnsBook_whenIsbnExists(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findByIsbn("9780132350884")).thenReturn(Optional.of(book));
+
+        Book result = bookService.getByIsbn("9780132350884");
+
+        assertSame(book, result);
+
+    }
+
+    @Test
+    void getByIsbn_throwsException_whenIsbnDoesNotExists(){
+        when(bookRepository.findByIsbn("0000000000000")).thenReturn(Optional.empty());
+        assertThrows(BookNotFoundException.class, () -> bookService.getByIsbn("0000000000000"));
     }
 }

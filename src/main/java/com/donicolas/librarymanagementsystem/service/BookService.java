@@ -30,4 +30,9 @@ public class BookService {
         if(loanRepository.existsByBookId(id)) throw new BookHasLoansException("Cannot delete book "+ id +": it has loans");
         bookRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public Book getByIsbn(String isbn){
+        return bookRepository.findByIsbn(isbn).orElseThrow(() -> new BookNotFoundException("Book with ISBN " + isbn + " not found"));
+    }
 }
