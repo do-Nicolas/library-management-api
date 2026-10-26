@@ -35,4 +35,11 @@ public class BookService {
     public Book getByIsbn(String isbn){
         return bookRepository.findByIsbn(isbn).orElseThrow(() -> new BookNotFoundException("Book with ISBN " + isbn + " not found"));
     }
+
+    @Transactional(readOnly = true)
+    public int getAvailableQuantity(Long id) {
+        Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Cannot find the book " + id));
+        long activeLoans = loanRepository.countByBookIdAndReturnDateIsNull(id);
+        return book.getTotalQntt() - (int) activeLoans;
+    }
 }

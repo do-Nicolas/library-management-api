@@ -101,4 +101,32 @@ class BookServiceTest {
         when(bookRepository.findByIsbn("0000000000000")).thenReturn(Optional.empty());
         assertThrows(BookNotFoundException.class, () -> bookService.getByIsbn("0000000000000"));
     }
+
+    @Test
+    void getAvailableQuantity_returnsTotalMinusActiveLoans_whenBookHasActiveLoans(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(loanRepository.countByBookIdAndReturnDateIsNull(1L)).thenReturn(2L);
+
+        int available = bookService.getAvailableQuantity(1L);
+        assertEquals(3, available);
+    }
+
+    @Test
+    void getAvailableQuantity_returnsTotal_whenThereAreNoActiveLoans(){
+        Book book = new Book("9780132350884", "Clean Code", "Robert C. Martin", 5);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(loanRepository.countByBookIdAndReturnDateIsNull(1L)).thenReturn(0L);
+
+        int available = bookService.getAvailableQuantity(1L);
+        assertEquals(5, available);
+    }
+
+    @Test
+    void getAvailableQuantity_throwsException_whenBookDoesNotExist(){
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(BookNotFoundException.class, () -> bookService.getAvailableQuantity(1L));
+        verify(loanRepository, never()).countByBookIdAndReturnDateIsNull(any());
+    }
 }
